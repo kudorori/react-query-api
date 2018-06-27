@@ -23,7 +23,9 @@ export default class Table extends React.Component {
     Actions: PT.oneOfType([PT.element, PT.func]),
     searchText: PT.string,
     page: PT.number,
-    limit: PT.number
+    limit: PT.number,
+    disabledPagination: PT.bool,
+
   }
   static defaultProps = {
     Wrapper: ({ children }) => <div>{children}</div>,
@@ -92,14 +94,15 @@ export default class Table extends React.Component {
     const Pagination = this.props.Pagination;
     const Actions = this.props.Actions;
     const ToolBarWrapper = this.props.ToolBarWrapper;
-    const { columns } = this.props;
+    const { columns, disabledPagination } = this.props;
+    const startOf = disabledPagination ? 0 : (this.props.page - 1) * this.props.limit;
 
     return (
       <Map data={this.props.data} functor={this.transformRow}>
         {({ data }) => (
           <Filter data={data} functor={this.filterRow}>
             {({ data }) => (
-              <Slice data={data} startOf={(this.props.page - 1) * this.props.limit} limit={this.props.limit}>
+              <Slice data={data} startOf={startOf} limit={disabledPagination ? data.length : this.props.limit}>
                 {({ data }) => (
                   <Wrapper>
                     <ToolBarWrapper>

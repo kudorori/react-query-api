@@ -13,14 +13,10 @@ export default class Map extends React.Component {
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    if(nextProps.data !== prevState.data) {
-      return {
-        data: nextProps.data,
-        compileData: nextProps.data.map(nextProps.functor)
-      }
+    return {
+      data: nextProps.data,
+      compileData: nextProps.data.map(nextProps.functor)
     }
-
-    return null;
   }
   state = {
     data: [],
