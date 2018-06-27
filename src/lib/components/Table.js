@@ -4,6 +4,7 @@ import PT from "prop-types";
 
 export default class Table extends React.Component {
   static propTypes = {
+    data: PT.arrayOf(PT.any),
     columns: PT.arrayOf(PT.shape({
       title: PT.oneOfType([PT.string, PT.func]),
       render: PT.func
@@ -22,8 +23,7 @@ export default class Table extends React.Component {
     Actions: PT.oneOfType([PT.element, PT.func]),
     searchText: PT.string,
     page: PT.number,
-    limit: PT.number,
-    query: PT.shape(Query),
+    limit: PT.number
   }
   static defaultProps = {
     Wrapper: ({ children }) => <div>{children}</div>,
@@ -39,7 +39,8 @@ export default class Table extends React.Component {
     Pagination: () => <div></div>,
     Actions: () => <div></div>,
     page: 1,
-    limit: 10
+    limit: 10,
+    data: []
   }
   renderHeader = () => {
     const { columns, HeaderRow } = this.props
@@ -94,38 +95,33 @@ export default class Table extends React.Component {
     const { columns } = this.props;
 
     return (
-      <Query endPoint={this.props.query.endPoint}>
+      <Map data={this.props.data} functor={this.transformRow}>
         {({ data }) => (
-          <Map data={data} functor={this.transformRow}>
+          <Filter data={data} functor={this.filterRow}>
             {({ data }) => (
-              <Filter data={data} functor={this.filterRow}>
+              <Slice data={data} startOf={(this.props.page - 1) * this.props.limit} limit={this.props.limit}>
                 {({ data }) => (
-                  <Slice data={data} startOf={(this.props.page - 1) * this.props.limit} limit={this.props.limit}>
-                    {({ data }) => (
-                      <Wrapper>
-                        <ToolBarWrapper>
-                          <Actions></Actions>
-                          <Search></Search>
-                        </ToolBarWrapper>
-                        <TableWrapper>
-                          <Header>
-                            {this.renderHeader()}
-                          </Header>
-                          <Body>
-                            {this.renderBodyRow(data)}
-                          </Body>
-                        </TableWrapper>
-                        <Pagination></Pagination>
-                      </Wrapper>
-                    )}
-                  </Slice>
+                  <Wrapper>
+                    <ToolBarWrapper>
+                      <Actions></Actions>
+                      <Search></Search>
+                    </ToolBarWrapper>
+                    <TableWrapper>
+                      <Header>
+                        {this.renderHeader()}
+                      </Header>
+                      <Body>
+                        {this.renderBodyRow(data)}
+                      </Body>
+                    </TableWrapper>
+                    <Pagination></Pagination>
+                  </Wrapper>
                 )}
-              </Filter>
+              </Slice>
             )}
-          </Map>
-
+          </Filter>
         )}
-      </Query>
+      </Map>
     )
   }
 }

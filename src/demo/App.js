@@ -25,16 +25,17 @@ export default class App extends React.Component {
   render() {
     return (
       <div>
-        {this.state.searchText}
-        <Table
-          columns={columns}
-          query={{
-            endPoint: "http://5b31e5237ad3350014b434a2.mockapi.io/api/user",
-            params: {}
-          }}
-          searchText={this.state.searchText}
-          Search={this.renderSearch}>
-        ></Table>
+        <Query endPoint={"http://5b31e5237ad3350014b434a2.mockapi.io/api/user"}>
+          {({ data }) => (
+            <Table
+              columns={columns}
+              data={data}
+              searchText={this.state.searchText}
+              Search={this.renderSearch}>
+            ></Table>
+          )}
+        </Query>
+
       </div>
     )
   }
