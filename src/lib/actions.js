@@ -3,6 +3,7 @@ import axios from "axios";
 
 export default {
   SET_RESPONSE: identity,
+  SET_DATA: identity,
   SET_PARAMS: identity,
   SET_IS_FAILED: identity,
   SET_IS_LOADING: identity,

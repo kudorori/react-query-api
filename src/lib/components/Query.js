@@ -1,6 +1,7 @@
 import React from "react";
 import axios from "axios";
 import PT from "prop-types";
+import { isEmpty } from "ramda";
 
 export default class Query extends React.PureComponent {
   static propTypes = {
@@ -31,6 +32,7 @@ export default class Query extends React.PureComponent {
   }
   state = {
     response: {},
+    data: {},
     params: {},
     error: {},
     isLoading: false,
@@ -101,11 +103,17 @@ export default class Query extends React.PureComponent {
     const isLoading = this.props.isLoading || this.state.isLoading;
     const isFailed = this.props.isFailed || this.state.isFailed;
     const response = this.props.response || this.state.response;
+    const params = this.props.params || this.state.params;
+    const data = this.props.data || this.state.data;
     const error = this.props.error || this.state.error;
     if(children !== null && children !== undefined && typeof(children) === "function") {
       return (
         <div>
-          { isFailed ? renderError(error) : children(response)}
+          { isFailed ? renderError(error) : !isEmpty(response) ? children({
+            data,
+            response,
+            params
+          }) : null}
           { renderLoading(isLoading) }
         </div>
       )

@@ -3,6 +3,8 @@ import Filter from "./components/Filter";
 import Map from "./components/Map";
 import Slice from "./components/Slice";
 import Table from "./components/Table";
+import Editable from "./components/Editable";
+
 import { generateReducer } from "./reducer";
 import actions from "./actions";
 export {
@@ -11,6 +13,7 @@ export {
   Map,
   Slice,
   Table,
+  Editable,
   generateReducer,
   actions
 };

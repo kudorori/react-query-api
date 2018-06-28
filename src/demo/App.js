@@ -2,6 +2,7 @@ import React from 'react';
 import { Query, Filter, Map, Slice, Table } from "../lib";
 import store from "./store";
 import UserList from "./container/UserList";
+import UserEdit from "./container/UserEdit";
 import { Provider } from "react-redux";
 
 
@@ -13,7 +14,10 @@ export default class App extends React.Component {
     return (
       <div>
         <Provider store={store}>
-          <UserList></UserList>
+          <div>
+            <UserEdit></UserEdit>
+            <UserList></UserList>
+          </div>
         </Provider>
       </div>
     )
