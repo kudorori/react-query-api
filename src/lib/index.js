@@ -6,7 +6,7 @@ import Table from "./components/Table";
 import Editable from "./components/Editable";
 
 import { generateReducer } from "./reducer";
-import actions from "./actions";
+import RQActions from "./actions";
 export {
   Query,
   Filter,
@@ -15,5 +15,5 @@ export {
   Table,
   Editable,
   generateReducer,
-  actions
+  RQActions
 };

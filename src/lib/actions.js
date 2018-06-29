@@ -9,6 +9,7 @@ export default {
   SET_IS_LOADING: identity,
   SET_ERROR: identity,
   SET_END_POINT: identity,
+  SET_DISABLED: identity,
   ON_SUCCESS: identity,
   ON_FAILED: identity,
 }

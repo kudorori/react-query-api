@@ -22,13 +22,15 @@ export default class Query extends React.PureComponent {
     isFailed: PT.bool,
     isLoading: PT.bool,
     renderLoading: PT.func,
-    renderError: PT.func
+    renderError: PT.func,
+    disabled: PT.bool
   }
 
   static defaultProps = {
     params: {},
     renderLoading: (isLoading) => <div style={{display: isLoading ? "block" : "none"}}>Loading...</div>,
-    renderError: (err) => <div>Response Error</div>
+    renderError: (err) => <div>Response Error</div>,
+    disabled: false
   }
   state = {
     response: {},
@@ -38,7 +40,11 @@ export default class Query extends React.PureComponent {
     isLoading: false,
   }
   componentDidUpdate(prevProps) {
-    if(this.props.endPoint !== prevProps.endPoint || this.props.params !== prevProps.params) {
+    if(!this.props.disabled && (
+        this.props.endPoint !== prevProps.endPoint ||
+        this.props.params !== prevProps.params ||
+        this.props.disabled !== prevProps.disabled
+    )) {
       const { endPoint, params } = this.props;
       const onRequest = this.onRequest || this.props.onRequest();
       onRequest(endPoint, params)
@@ -46,9 +52,13 @@ export default class Query extends React.PureComponent {
   }
 
   componentDidMount() {
-    const { endPoint, params } = this.props;
-    const onRequest = this.onRequest || this.props.onRequest();
-    onRequest(endPoint, params)
+
+    const { endPoint, params, disabled } = this.props;
+    if( !disabled) {
+      const onRequest = this.onRequest || this.props.onRequest();
+      onRequest(endPoint, params)
+    }
+
   }
 
   onRequest = async (endPoint, params) => {
