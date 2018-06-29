@@ -118,9 +118,9 @@ export default class Table extends React.Component {
                       {
                         Body != null ? (
                           <Body>
-                            {this.renderBodyRow()}
+                            {this.renderBodyRow(data)}
                           </Body>
-                        ) : this.renderBodyRow()
+                        ) : this.renderBodyRow(data)
                       }
                     </TableWrapper>
                     <Pagination></Pagination>

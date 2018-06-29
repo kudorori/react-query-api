@@ -22,7 +22,10 @@ class UserList extends React.Component {
         {...props}
       >
         {({ data }) => (
-          <Table data={data} columns={this.columns}></Table>
+          <Table
+            data={data}
+            columns={this.columns}
+          ></Table>
         )}
       </Query>
     )
