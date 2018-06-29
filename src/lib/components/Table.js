@@ -110,12 +110,18 @@ export default class Table extends React.Component {
                       <Search></Search>
                     </ToolBarWrapper>
                     <TableWrapper>
-                      <Header>
-                        {this.renderHeader()}
-                      </Header>
-                      <Body>
-                        {this.renderBodyRow(data)}
-                      </Body>
+                      { Header != null ? (
+                        <Header>
+                          {this.renderHeader()}
+                        </Header>
+                      ) : this.renderHeader()}
+                      {
+                        Body != null ? (
+                          <Body>
+                            {this.renderBodyRow()}
+                          </Body>
+                        ) : this.renderBodyRow()
+                      }
                     </TableWrapper>
                     <Pagination></Pagination>
                   </Wrapper>
