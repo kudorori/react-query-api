@@ -7,7 +7,9 @@ export default class Table extends React.Component {
     data: PT.arrayOf(PT.any),
     columns: PT.arrayOf(PT.shape({
       title: PT.oneOfType([PT.string, PT.func]),
-      render: PT.func
+      render: PT.func,
+      cellProps: PT.any,
+
     })),
     TableWrapper: PT.oneOfType([PT.element, PT.func]),
     Wrapper: PT.oneOfType([PT.element, PT.func]),
@@ -69,10 +71,14 @@ export default class Table extends React.Component {
     ))
   }
   renderBodyRowCell = (rows, rowId) => {
-    const { BodyRowCell } = this.props;
-    return rows.map((transed, idx) => (
-      <BodyRowCell key={idx}>{transed}</BodyRowCell>
-    ))
+    const { BodyRowCell, columns } = this.props;
+    
+    return rows.map((transed, idx) => {
+      const props = columns[idx].cellProps || {};
+      return (
+        <BodyRowCell key={idx} {...props}>{transed}</BodyRowCell>
+      )
+    })
   }
 
   transformRow = row => {
