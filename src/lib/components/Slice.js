@@ -17,7 +17,7 @@ export default class Filter extends React.Component {
     const { startOf, limit } = nextProps;
     return {
       data: nextProps.data,
-      compileData: nextProps.data.slice(startOf, limit),
+      compileData: nextProps.data.slice(startOf, (parseInt(startOf) + parseInt(limit))),
       total: nextProps.data.length,
     }
   }
