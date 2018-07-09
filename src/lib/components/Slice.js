@@ -17,7 +17,8 @@ export default class Filter extends React.Component {
     const { startOf, limit } = nextProps;
     return {
       data: nextProps.data,
-      compileData: nextProps.data.slice(startOf, limit)
+      compileData: nextProps.data.slice(startOf, limit),
+      total: nextProps.data.length,
     }
   }
   state = {
@@ -30,6 +31,7 @@ export default class Filter extends React.Component {
     if(children !== null && children !== undefined && typeof(children) === "function") {
       return children({
         data: this.state.compileData,
+        total: this.state.total
       })
     }
   }

@@ -27,7 +27,7 @@ export default class Table extends React.Component {
     page: PT.number,
     limit: PT.number,
     disabledPagination: PT.bool,
-
+    onPageChange: PT.func
   }
   static defaultProps = {
     Wrapper: ({ children }) => <div>{children}</div>,
@@ -42,6 +42,7 @@ export default class Table extends React.Component {
     Search: () => <div></div>,
     Pagination: () => <div></div>,
     Actions: () => <div></div>,
+    onPageChange: () => console.log("onPageChange"),
     page: 1,
     limit: 10,
     data: []
@@ -100,8 +101,8 @@ export default class Table extends React.Component {
     const Pagination = this.props.Pagination;
     const Actions = this.props.Actions;
     const ToolBarWrapper = this.props.ToolBarWrapper;
-    const { columns, disabledPagination } = this.props;
-    const startOf = disabledPagination ? 0 : (this.props.page - 1) * this.props.limit;
+    const { columns, disabledPagination, limit, page } = this.props;
+    const startOf = disabledPagination ? 0 : (page - 1) * limit;
 
     return (
       <Map data={this.props.data} functor={this.transformRow}>
@@ -109,7 +110,7 @@ export default class Table extends React.Component {
           <Filter data={data} functor={this.filterRow}>
             {({ data }) => (
               <Slice data={data} startOf={startOf} limit={disabledPagination ? data.length : this.props.limit}>
-                {({ data }) => (
+                {({ data, total }) => (
                   <Wrapper>
                     <ToolBarWrapper>
                       <Actions></Actions>
@@ -129,7 +130,7 @@ export default class Table extends React.Component {
                         ) : this.renderBodyRow(data)
                       }
                     </TableWrapper>
-                    <Pagination></Pagination>
+                    <Pagination offset={startOf} limit={limit} page={page} total={total} ></Pagination>
                   </Wrapper>
                 )}
               </Slice>
