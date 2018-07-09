@@ -57,6 +57,8 @@ export default class Table extends React.Component {
         title: "No.",
         render: "no"
       }, ...props.columns]
+    } else {
+      columns = columns
     }
     return {
       columns: columns
