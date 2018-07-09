@@ -14,8 +14,13 @@ class UserList extends React.Component {
     render: ({ data }) => data.name
   }]
 
+  state = {
+    selected: []
+  }
+
   render() {
     const { query, ...props } = this.props;
+    console.log(this.state.selected);
     return (
       <Query
         {...query}
@@ -26,6 +31,9 @@ class UserList extends React.Component {
             data={data}
             columns={this.columns}
             autoNum
+            multi
+            selected={this.state.selected}
+            onItemSelected={({ data }) => this.setState({ selected: data })}
             Pagination={(props) => {
               console.log(props)
               return (

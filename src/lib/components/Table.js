@@ -1,7 +1,8 @@
 import React from "react";
 import { Filter, Query, Slice, Map } from "../";
 import PT from "prop-types";
-import { pathOr } from "ramda";
+import { pathOr, contains, symmetricDifference, union } from "ramda";
+import classnames from "classnames";
 
 export default class Table extends React.Component {
   static propTypes = {
@@ -28,7 +29,13 @@ export default class Table extends React.Component {
     page: PT.number,
     limit: PT.number,
     disabledPagination: PT.bool,
-    onPageChange: PT.func
+    onPageChange: PT.func,
+    onItemSelected: PT.func,
+    selected: PT.arrayOf(PT.any),
+    primaryKey: PT.string,
+    multi: PT.boolean,
+    itemActiveClass: PT.string,
+    itemDisabledClass: PT.string,
   }
   static defaultProps = {
     Wrapper: ({ children }) => <div>{children}</div>,
@@ -38,7 +45,7 @@ export default class Table extends React.Component {
     HeaderRow: ({ children }) => <tr>{children}</tr>,
     HeaderRowCell: ({ children }) => <th>{children}</th>,
     Body: ({ children }) => <tbody>{children}</tbody>,
-    BodyRow: ({ children }) => <tr>{children}</tr>,
+    BodyRow: (props) => <tr {...props}></tr>,
     BodyRowCell: ({ children }) => <td>{children}</td>,
     Search: () => <div></div>,
     Pagination: () => <div></div>,
@@ -47,7 +54,12 @@ export default class Table extends React.Component {
     autoNum: false,
     page: 1,
     limit: 10,
-    data: []
+    data: [],
+    multi: false,
+    primaryKeyIndex: 0,
+    selected: [],
+    onItemSelected: () => console.log("onRowClick"),
+    itemActiveClass: "active"
   }
 
   static getDerivedStateFromProps(props, state) {
@@ -83,12 +95,45 @@ export default class Table extends React.Component {
     )
   }
   renderBodyRow = (data) => {
-    const { BodyRow } = this.props
-    return data.map((item, rowId) => (
-      <BodyRow key={rowId}>
-        {this.renderBodyRowCell(item, rowId)}
-      </BodyRow>
-    ))
+    const {
+      BodyRow,
+      itemActiveClass,
+      primaryKeyIndex,
+      selected,
+      multi,
+      onItemSelected
+    } = this.props;
+    return data.map((item, rowId) => {
+      const primaryValue = item[primaryKeyIndex];
+      const isSelected = contains(primaryValue, selected);
+      return (
+        <BodyRow
+          key={rowId}
+          onClick={() => {
+            if(primaryValue != undefined && isSelected) {
+              //選項已選取，取消選取
+              if( multi ) {
+                onItemSelected({ data: symmetricDifference(selected, [primaryValue])})
+              } else {
+                onItemSelected({ data: [] })
+              }
+            } else if(primaryValue != undefined && !isSelected) {
+              //選項未選取，增加選取
+              if( multi ) {
+                onItemSelected({ data: union(selected, [primaryValue])})
+              } else {
+                onItemSelected({ data: [primaryValue] })
+              }
+            }
+          }}
+          className={classnames({
+            [itemActiveClass]: primaryValue != undefined && isSelected,
+          })}
+        >
+          {this.renderBodyRowCell(item, rowId)}
+        </BodyRow>
+      )
+    })
   }
   renderBodyRowCell = (rows, rowId) => {
     const { BodyRowCell } = this.props;
