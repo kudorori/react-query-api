@@ -8,7 +8,7 @@ import { Query, Table } from "../../lib";
 class UserList extends React.Component {
   columns = [{
     title: "id",
-    render: ({ data }) => data.id,
+    render: "id",
   }, {
     title: "name",
     render: ({ data }) => data.name

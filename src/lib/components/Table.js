@@ -83,7 +83,7 @@ export default class Table extends React.Component {
 
   transformRow = row => {
     const { columns } = this.props;
-    return columns.map(column => typeof(column.render) == "function" ? column.render({ data: row }) : pathOr("無資料", column.split("."), row));
+    return columns.map(column => typeof(column.render) == "function" ? column.render({ data: row }) : pathOr("無資料", column.render.split("."), row));
   }
   filterRow = row => {
     const { searchText } = this.props;
