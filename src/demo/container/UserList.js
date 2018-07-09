@@ -25,6 +25,7 @@ class UserList extends React.Component {
           <Table
             data={data}
             columns={this.columns}
+            autoNum
             Pagination={(props) => {
               console.log(props)
               return (

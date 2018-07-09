@@ -23,6 +23,7 @@ export default class Table extends React.Component {
     Search: PT.oneOfType([PT.element, PT.func]),
     Pagination: PT.oneOfType([PT.element, PT.func]),
     Actions: PT.oneOfType([PT.element, PT.func]),
+    autoNum: PT.bool,
     searchText: PT.string,
     page: PT.number,
     limit: PT.number,
@@ -43,12 +44,28 @@ export default class Table extends React.Component {
     Pagination: () => <div></div>,
     Actions: () => <div></div>,
     onPageChange: () => console.log("onPageChange"),
+    autoNum: false,
     page: 1,
     limit: 10,
     data: []
   }
+
+  static getDerivedStateFromProps(props, state) {
+    let columns = [];
+    if(props.autoNum) {
+      columns = [{
+        title: "No.",
+        render: "no"
+      }, ...props.columns]
+    }
+    return {
+      columns: columns
+    }
+  }
+
   renderHeader = () => {
-    const { columns, HeaderRow } = this.props
+    const { HeaderRow } = this.props;
+    const { columns } = this.state;
     return (
       <HeaderRow>
         {columns.map(this.renderHeaderCell)}
@@ -72,7 +89,8 @@ export default class Table extends React.Component {
     ))
   }
   renderBodyRowCell = (rows, rowId) => {
-    const { BodyRowCell, columns } = this.props;
+    const { BodyRowCell } = this.props;
+    const { columns } = this.state;
 
     return rows.map((transed, idx) => {
       const props = columns[idx].cellProps || {};
@@ -82,9 +100,10 @@ export default class Table extends React.Component {
     })
   }
 
-  transformRow = row => {
-    const { columns } = this.props;
-    return columns.map(column => typeof(column.render) == "function" ? column.render({ data: row }) : pathOr("無資料", column.render.split("."), row));
+  transformRow = (row, idx) => {
+    const { columns } = this.state;
+    const data = this.props.autoNum ? { no: idx + 1, ...row } : row;
+    return columns.map(column => typeof(column.render) == "function" ? column.render({ data }) : pathOr("無資料", column.render.split("."), data));
   }
   filterRow = row => {
     const { searchText } = this.props;
@@ -101,8 +120,9 @@ export default class Table extends React.Component {
     const Pagination = this.props.Pagination;
     const Actions = this.props.Actions;
     const ToolBarWrapper = this.props.ToolBarWrapper;
-    const { columns, disabledPagination, limit, page } = this.props;
+    const { disabledPagination, limit, page } = this.props;
     const startOf = disabledPagination ? 0 : (page - 1) * limit;
+    const { columns } = this.state;
 
     return (
       <Map data={this.props.data} functor={this.transformRow}>
