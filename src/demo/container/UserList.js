@@ -25,6 +25,12 @@ class UserList extends React.Component {
           <Table
             data={data}
             columns={this.columns}
+            Pagination={(props) => {
+              console.log(props)
+              return (
+                <div>Pagi</div>
+              )
+            }}
           ></Table>
         )}
       </Query>
