@@ -1,6 +1,7 @@
 import React from "react";
 import { Filter, Query, Slice, Map } from "../";
 import PT from "prop-types";
+import { pathOr } from "ramda";
 
 export default class Table extends React.Component {
   static propTypes = {
@@ -9,7 +10,6 @@ export default class Table extends React.Component {
       title: PT.oneOfType([PT.string, PT.func]),
       render: PT.func,
       cellProps: PT.any,
-
     })),
     TableWrapper: PT.oneOfType([PT.element, PT.func]),
     Wrapper: PT.oneOfType([PT.element, PT.func]),
@@ -72,7 +72,7 @@ export default class Table extends React.Component {
   }
   renderBodyRowCell = (rows, rowId) => {
     const { BodyRowCell, columns } = this.props;
-    
+
     return rows.map((transed, idx) => {
       const props = columns[idx].cellProps || {};
       return (
@@ -83,7 +83,7 @@ export default class Table extends React.Component {
 
   transformRow = row => {
     const { columns } = this.props;
-    return columns.map(column => typeof(column.render) == "function" ? column.render({ data: row }) : "");
+    return columns.map(column => typeof(column.render) == "function" ? column.render({ data: row }) : pathOr("無資料", column.split("."), row));
   }
   filterRow = row => {
     const { searchText } = this.props;

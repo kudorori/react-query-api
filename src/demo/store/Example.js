@@ -1,14 +1,14 @@
 import R from "ramda";
 import { createActions, handleActions } from "redux-actions";
-import { actions, generateReducer } from "../../lib";
+import { RQActions, generateReducer } from "../../lib";
 
 const acts = createActions({
   EXAMPLE: {
     QUERY: {
-      ...actions
+      ...RQActions
     },
     EDIT: {
-      ...actions
+      ...RQActions
     }
   }
 })
