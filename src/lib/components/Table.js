@@ -63,6 +63,7 @@ export default class Table extends React.Component {
   }
 
   static getDerivedStateFromProps(props, state) {
+
     let columns = [];
     if(props.autoNum) {
       columns = [{
@@ -73,7 +74,8 @@ export default class Table extends React.Component {
       columns = columns
     }
     return {
-      columns: columns
+      columns: columns,
+      searchText: props.searchText != undefined ? props.searchText.toLowerCase() : ""
     }
   }
 
@@ -153,9 +155,13 @@ export default class Table extends React.Component {
     return columns.map(column => typeof(column.render) == "function" ? column.render({ data }) : pathOr("無資料", column.render.split("."), data));
   }
   filterRow = row => {
-    const { searchText } = this.props;
-    const str = row.filter(item => (typeof(item) == "string" || typeof(item) == "number")).join("");
-    return new RegExp(searchText, "gi").test(str);
+    const { searchText } = this.state;
+    if(searchText == "" || searchText == undefined) {
+      return true;
+    }
+    const str = row.filter(item => (typeof(item) == "string" || typeof(item) == "number")).join("").toLowerCase();
+
+    return str.indexOf(searchText) != -1;
   }
   render() {
     const TableWrapper = this.props.TableWrapper;

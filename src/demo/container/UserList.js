@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import { ExampleActions } from "../store/Example";
 import { Query, Table } from "../../lib";
-
+import { times } from "ramda";
 
 class UserList extends React.Component {
   columns = [{
@@ -15,34 +15,56 @@ class UserList extends React.Component {
   }]
 
   state = {
-    selected: []
+    selected: [],
+    value: "",
+    page: 1,
+    searchText: ""
   }
 
+  static getDerivedStateFromProps() {
+    return {
+      data: times(idx => ({
+        id: idx,
+        name: `Name-${idx}`
+      }), 100000)
+    }
+  }
+
+  renderPagination = (props) => {
+    return (
+      <input type="text" value={this.state.page} onChange={({ target: { value }}) => this.setState(state => ({
+        ...state,
+        page: value
+      }))}></input>
+    )
+  }
+  renderSearch = props => {
+    return (
+      <input type="text" value={this.state.searchText} onChange={({ target: { value }}) => this.setState(state => ({
+        ...state,
+        searchText: value
+      }))}></input>
+    )
+  }
   render() {
     const { query, ...props } = this.props;
-    console.log(this.state.selected);
+    const { data } = this.state;
     return (
-      <Query
-        {...query}
-        {...props}
-      >
-        {({ data }) => (
-          <Table
-            data={data}
-            columns={this.columns}
-            autoNum
-            multi
-            selected={this.state.selected}
-            onItemSelected={({ data }) => this.setState({ selected: data })}
-            Pagination={(props) => {
-              console.log(props)
-              return (
-                <div>Pagi</div>
-              )
-            }}
-          ></Table>
-        )}
-      </Query>
+      <Table
+        data={data}
+        columns={this.columns}
+        autoNum
+        multi
+        selected={this.state.selected}
+        onItemSelected={({ data }) => this.setState(state => ({
+          ...state,
+          selected: data
+        }))}
+        page={this.state.page}
+        searchText={this.state.searchText}
+        Pagination={this.renderPagination}
+        Search={this.renderSearch}
+      ></Table>
     )
   }
 }

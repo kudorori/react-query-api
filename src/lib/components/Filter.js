@@ -13,6 +13,11 @@ export default class Filter extends React.Component {
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
+
+    if(nextProps.data === prevState.data) {
+      return null;
+    }
+    
     return {
       data: nextProps.data,
       compileData: nextProps.data.filter(nextProps.functor)

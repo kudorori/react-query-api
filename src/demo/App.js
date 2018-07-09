@@ -15,7 +15,7 @@ export default class App extends React.Component {
       <div>
         <Provider store={store}>
           <div>
-            <UserEdit></UserEdit>
+            {/* <UserEdit></UserEdit> */}
             <UserList></UserList>
           </div>
         </Provider>
