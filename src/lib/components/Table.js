@@ -114,7 +114,7 @@ export default class Table extends React.Component {
                   <Wrapper>
                     <ToolBarWrapper>
                       <Actions></Actions>
-                      <Search></Search>
+                      <Search searchText={this.props.searchText}></Search>
                     </ToolBarWrapper>
                     <TableWrapper>
                       { Header != null ? (
