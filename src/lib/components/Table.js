@@ -163,7 +163,15 @@ export default class Table extends React.Component {
 
     return columns.some(column => {
       const str = typeof(column.render) === "function" ? column.render({ data: row }) : pathOr("", column.render.split("."), row);
-      return typeof( str ) == "string" && str.toLowerCase().indexOf(searchText) != -1;
+      switch(typeof( str )) {
+        case "string":
+          return str.toLowerCase().indexOf(searchText) != -1;
+          break;
+        case "number":
+          return str.toString().toLowerCase().indexOf(searchText) != -1;
+          break;
+      }
+
     })
   }
   render() {

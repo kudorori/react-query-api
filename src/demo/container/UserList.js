@@ -11,7 +11,7 @@ class UserList extends React.Component {
     render: "id",
   }, {
     title: "name",
-    render: ({ data }) => data.name
+    render: ({ data }) => ""
   }]
 
   state = {
