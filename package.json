@@ -1,6 +1,6 @@
 {
   "name": "react-query-api",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "React Query Api & Common",
   "main": "build/index.js",
   "scripts": {

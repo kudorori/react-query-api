@@ -26,7 +26,7 @@ class UserList extends React.Component {
       data: times(idx => ({
         id: idx,
         name: `Name-${idx}`
-      }), 100000)
+      }), 90000)
     }
   }
 

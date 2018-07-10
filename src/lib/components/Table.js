@@ -155,13 +155,16 @@ export default class Table extends React.Component {
     return columns.map(column => typeof(column.render) == "function" ? column.render({ data }) : pathOr("無資料", column.render.split("."), data));
   }
   filterRow = row => {
-    const { searchText } = this.state;
+
+    const { searchText, columns } = this.state;
     if(searchText == "" || searchText == undefined) {
       return true;
     }
-    const str = row.filter(item => (typeof(item) == "string" || typeof(item) == "number")).join("").toLowerCase();
 
-    return str.indexOf(searchText) != -1;
+    return columns.some(column => {
+      const str = typeof(column.render) === "function" ? column.render({ data: row }) : pathOr("", column.render.split("."), row);
+      return typeof( str ) == "string" && str.toLowerCase().indexOf(searchText) != -1;
+    })
   }
   render() {
     const TableWrapper = this.props.TableWrapper;
@@ -178,12 +181,12 @@ export default class Table extends React.Component {
     const { columns } = this.state;
 
     return (
-      <Map data={this.props.data} functor={this.transformRow}>
+      <Filter data={this.props.data} functor={this.filterRow}>
         {({ data }) => (
-          <Filter data={data} functor={this.filterRow}>
-            {({ data }) => (
-              <Slice data={data} startOf={startOf} limit={disabledPagination ? data.length : this.props.limit}>
-                {({ data, total }) => (
+          <Slice data={data} startOf={startOf} limit={disabledPagination ? data.length : this.props.limit}>
+            {({ data, total }) => (
+              <Map data={data} functor={this.transformRow}>
+                {({ data }) => (
                   <Wrapper>
                     <ToolBarWrapper>
                       <Actions></Actions>
@@ -206,11 +209,12 @@ export default class Table extends React.Component {
                     <Pagination offset={startOf} limit={limit} page={page} total={total} ></Pagination>
                   </Wrapper>
                 )}
-              </Slice>
+              </Map>
             )}
-          </Filter>
+          </Slice>
         )}
-      </Map>
+      </Filter>
     )
+
   }
 }
