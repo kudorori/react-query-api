@@ -150,8 +150,10 @@ export default class Table extends React.Component {
   }
 
   transformRow = (row, idx) => {
+    const { disabledPagination, limit, page } = this.props;
+    const startOf = disabledPagination ? 0 : (page - 1) * limit;
     const { columns } = this.state;
-    const data = this.props.autoNum ? { no: idx + 1, ...row } : row;
+    const data = this.props.autoNum ? { no: startOf + idx + 1, ...row } : row;
     return columns.map(column => typeof(column.render) == "function" ? column.render({ data }) : pathOr("無資料", column.render.split("."), data));
   }
   filterRow = row => {
