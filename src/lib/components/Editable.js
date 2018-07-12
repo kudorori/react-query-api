@@ -26,7 +26,7 @@ const dataMappingFields = (data, fields, onChange, prefixPath = []) => {
           })
         }
       })
-    } else if(typeof(item) == "object") {
+    } else if(item !== null && typeof(item) === "object") {
       const p = [...prefixPath, key];
       return dataMappingFields(data[key], fields, value => onChange(assocPath(p, value, data)), p)
     } else {
