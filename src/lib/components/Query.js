@@ -23,6 +23,7 @@ export default class Query extends React.PureComponent {
     isLoading: PT.bool,
     renderLoading: PT.func,
     renderError: PT.func,
+    renderEmpty: PT.func,
     disabled: PT.bool
   }
 
@@ -30,6 +31,7 @@ export default class Query extends React.PureComponent {
     params: {},
     renderLoading: (isLoading) => <div style={{display: isLoading ? "block" : "none"}}>Loading...</div>,
     renderError: (err) => <div>Response Error</div>,
+    renderEmpty: () => <div>Empty</div>,
     disabled: false
   }
   state = {
@@ -109,7 +111,7 @@ export default class Query extends React.PureComponent {
   }
 
   render() {
-    const { children, renderLoading, renderError } = this.props;
+    const { children, renderLoading, renderError, renderEmpty } = this.props;
     const isLoading = this.props.isLoading || this.state.isLoading;
     const isFailed = this.props.isFailed || this.state.isFailed;
     const response = this.props.response || this.state.response;
@@ -123,7 +125,7 @@ export default class Query extends React.PureComponent {
             data,
             response,
             params
-          }) : null}
+          }) : renderEmpty()}
           { renderLoading(isLoading) }
         </div>
       )
