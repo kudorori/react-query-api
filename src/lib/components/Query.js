@@ -121,11 +121,11 @@ export default class Query extends React.PureComponent {
     if(children !== null && children !== undefined && typeof(children) === "function") {
       return (
         <div>
-          { isFailed ? renderError(error) : !isEmpty(response) ? children({
+          { isFailed ? renderError(error) : children({
             data,
             response,
             params
-          }) : renderEmpty()}
+          })}
           { renderLoading(isLoading) }
         </div>
       )
