@@ -23,6 +23,7 @@ export const generateReducer = (path, actions) => {
     [actions.setIsFailed]: (state, { payload }) => assocPath([...path, "isFailed"], payload, state),
     [actions.setIsLoading]: (state, { payload }) => assocPath([...path, "isLoading"], payload, state),
     [actions.setDisabled]: (state, { payload }) => assocPath([...path, "disabled"], payload, state),
+    [actions.refresh]: (state) => assocPath([...path, "params", "timestamp"], new Date().getTime(), state),
     [actions.onSuccess]: (state, { payload }) => pipe(
       assocPath([...path, "response"], payload),
       assocPath([...path, "data"], payload.data),
