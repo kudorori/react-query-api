@@ -154,7 +154,7 @@ export default class Table extends React.Component {
     const startOf = disabledPagination ? 0 : (page - 1) * limit;
     const { columns } = this.state;
     const data = this.props.autoNum ? { no: startOf + idx + 1, ...row } : row;
-    return columns.map(column => typeof(column.render) == "function" ? column.render({ data }) : pathOr("無資料", column.render.split("."), data));
+    return columns.map(column => typeof(column.render) == "function" ? column.render({ data, ownData: row }) : pathOr("無資料", column.render.split("."), data));
   }
   filterRow = row => {
 
