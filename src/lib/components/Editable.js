@@ -7,7 +7,7 @@ const dataMappingFields = (data, fields, onChange, prefixPath = []) => {
     if(fields[key] == undefined) {
       return ""
     }
-    if(Array.isArray(item)) {
+    if(Array.isArray(item) && false) {
       return item.map((subItem, idx) => {
         const p = [...prefixPath, key, idx];
         if(typeof(subItem) == "object") {
@@ -26,7 +26,7 @@ const dataMappingFields = (data, fields, onChange, prefixPath = []) => {
           })
         }
       })
-    } else if(item !== null && typeof(item) === "object") {
+    } else if(item !== null && typeof(item) === "object" && false) {
       const p = [...prefixPath, key];
       return dataMappingFields(data[key], fields, value => onChange(assocPath(p, value, data)), p)
     } else {
