@@ -96,6 +96,7 @@ export default class Query extends React.PureComponent {
     this.setState(state => ({
       ...state,
       response: res,
+      data: res.data,
       params,
       isFailed: false,
     }))
