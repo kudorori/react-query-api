@@ -68,11 +68,12 @@ export default class Table extends React.Component {
     if(props.autoNum) {
       columns = [{
         title: "No.",
-        render: "no"
+        render: "no",
       }, ...props.columns]
     } else {
       columns = columns
     }
+
     return {
       columns: columns,
       searchText: props.searchText != undefined ? props.searchText.toLowerCase() : ""
@@ -90,8 +91,9 @@ export default class Table extends React.Component {
   };
   renderHeaderCell = (column, idx) => {
     const { HeaderRowCell } = this.props
+    const props = column.cellProps || {};
     return (
-      <HeaderRowCell key={idx}>
+      <HeaderRowCell key={idx} {...props}>
         { typeof(column.title) == "function" ? column.title() : column.title }
       </HeaderRowCell>
     )
