@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import { ExampleActions } from "../store/Example";
-import { Query, Table, Editable } from "../../lib";
+import { Table, Editable } from "../../lib";
 
 
 class UserEdit extends React.Component {
@@ -55,7 +55,7 @@ class UserEdit extends React.Component {
             }) => {
               return (
                 <div>
-                  
+
                   {id}
                   {name}
                   <div>123</div>

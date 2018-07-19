@@ -13,10 +13,6 @@ export default class Filter extends React.Component {
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
-
-    
-
-
     return {
       data: nextProps.data,
       compileData: nextProps.data.filter(nextProps.functor)

@@ -6,10 +6,21 @@ import QueryActions from "../actions/QueryActions";
 export default handleActions({
   [QueryActions.onSuccess]: (state, { payload: { id, payload }}) => pipe(
     assocPath([id, "response"], payload),
-    assocPath([id, "data"], payload.data)
+    assocPath([id, "data"], payload.data),
+    assocPath([id, "isRefresh"], false)
   )(state),
   [QueryActions.onInitial]: (state, { payload: { id, options }}) => pipe(
-    assocPath([id, "options"], options)
+    assocPath([id, "data"], {}),
+    assocPath([id, "response"], {}),
+    assocPath([id, "error"], {}),
+    assocPath([id, "isRefresh"], false)
   )(state),
-  [QueryActions.refresh]: (state, { payload: { id }}) => assocPath([id, "options", "params", "unix"], new Date().getTime(), state)
+  [QueryActions.refresh]: (state, { payload: { id }}) => pipe(
+    assocPath([id, "isRefresh"], true)
+  )(state),
+  [QueryActions.onError]: ( state, { payload: { id, error }}) => pipe(
+    assocPath([id, "error"], error),
+    assocPath([id, "data"], {}),
+    assocPath([id, "response"], {})
+  )(state)
 }, {})
