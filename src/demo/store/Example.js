@@ -4,32 +4,16 @@ import { RQActions, generateReducer } from "../../lib";
 
 const acts = createActions({
   EXAMPLE: {
-    QUERY: {
-      ...RQActions
-    },
-    EDIT: {
-      ...RQActions
-    }
+
   }
 })
 
 const ExampleActions = acts.example;
 
-const queryReducer = generateReducer(["query"], ExampleActions.query);
-const editReducer = generateReducer(["edit"], ExampleActions.edit);
-
 export default handleActions({
-  ...queryReducer,
-  ...editReducer
+
 }, {
-  query: {
-    endPoint: "http://5b31e5237ad3350014b434a2.mockapi.io/api/user",
-    params: {}
-  },
-  edit: {
-    endPoint: "http://5b31e5237ad3350014b434a2.mockapi.io/api/user/1",
-    params: {}
-  }
+  
 })
 
 export {

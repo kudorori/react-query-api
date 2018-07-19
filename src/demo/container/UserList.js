@@ -4,6 +4,7 @@ import { bindActionCreators } from "redux";
 import { ExampleActions } from "../store/Example";
 import { Query, Table } from "../../lib";
 import { times } from "ramda";
+import QueryConnect from "../../lib/connects/QueryConnect";
 
 class UserList extends React.Component {
   columns = [{
@@ -49,32 +50,22 @@ class UserList extends React.Component {
   render() {
     const { query, ...props } = this.props;
     const { data } = this.state;
+
     return (
-      <Table
-        data={data}
-        columns={this.columns}
-        autoNum
-        multi
-        selected={this.state.selected}
-        onItemSelected={({ data }) => this.setState(state => ({
-          ...state,
-          selected: data
-        }))}
-        page={this.state.page}
-        searchText={this.state.searchText}
-        Pagination={this.renderPagination}
-        Search={this.renderSearch}
-      ></Table>
+      <Query {...this.props.getUser}>
+        {({ data }) => (
+          <div>
+            <button onClick={() => this.props.getUser.refresh("getUser")}>Refresh</button>
+            <div>{JSON.stringify(data)}</div>
+
+          </div>
+        )}
+      </Query>
     )
   }
 }
 
 
-export default connect(
-  state => state.Example,
-  dispatch => bindActionCreators(ExampleActions.query, dispatch),
-  (state, dispatch) => ({
-    ...state,
-    ...dispatch
-  })
-)(UserList)
+export default QueryConnect("getUser", {
+  url: "http://5b31e5237ad3350014b434a2.mockapi.io/api/user"
+})(UserList)

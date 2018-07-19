@@ -1,7 +1,7 @@
 import React from "react";
 import axios from "axios";
 import PT from "prop-types";
-import { isEmpty } from "ramda";
+import { isEmpty, equals } from "ramda";
 
 export default class Query extends React.PureComponent {
   static propTypes = {
@@ -42,28 +42,20 @@ export default class Query extends React.PureComponent {
     isLoading: false,
   }
   componentDidUpdate(prevProps) {
-    if(!this.props.disabled && (
-        this.props.endPoint !== prevProps.endPoint ||
-        this.props.params !== prevProps.params ||
-        this.props.disabled !== prevProps.disabled
-    )) {
-      const { endPoint, params } = this.props;
+    if(!equals(prevProps.options, this.props.options)) {
+      const { disabled, id, options } = this.props;
       const onRequest = this.onRequest || this.props.onRequest();
-      onRequest(endPoint, params)
+      onRequest(options)
     }
   }
 
   componentDidMount() {
-
-    const { endPoint, params, disabled } = this.props;
-    if( !disabled) {
-      const onRequest = this.onRequest || this.props.onRequest();
-      onRequest(endPoint, params)
-    }
-
+    const { disabled, options, defaultOptions, id } = this.props;
+    console.log(this.props);
+    this.props.onInitial(defaultOptions);
   }
 
-  onRequest = async (endPoint, params) => {
+  onRequest = async (options) => {
     const onResponse = this.props.onResponse || this.onResponse;
     const onSuccess = this.props.onSuccess || this.onSuccess;
     const onFailed = this.props.onFailed || this.onFailed;
@@ -71,14 +63,13 @@ export default class Query extends React.PureComponent {
       ...state,
       isLoading: true
     }))
+
     try {
-      const res = await axios({
-        url: endPoint,
-        params
-      });
+      const res = await axios(options);
       onResponse(res);
       onSuccess(res);
     } catch ( err ) {
+      console.log(err);
       onFailed(err);
     }
     await this.setState(state => ({
@@ -87,27 +78,23 @@ export default class Query extends React.PureComponent {
     }))
   }
 
-  onResponse = res => {
+  onResponse = (res) => {
 
   }
 
-  onSuccess = res => {
-    const { endPoint, params } = this.props;
+  onSuccess = (res) => {
     this.setState(state => ({
       ...state,
       response: res,
       data: res.data,
-      params,
       isFailed: false,
     }))
   }
-  onFailed = err => {
-    const { endPoint, params } = this.props;
+  onFailed = (err) => {
     this.setState(state => ({
       ...state,
-      params,
-      error: err,
       isFailed: true,
+      error: err
     }))
   }
 

@@ -19,6 +19,8 @@
   "homepage": "https://github.com/kudorori/react-query-api#readme",
   "license": "MIT",
   "dependencies": {
+    "ajv": "^6.5.2",
+    "ajv-errors": "^1.0.0",
     "axios": "^0.18.0",
     "classnames": "^2.2.6",
     "ramda": "^0.25.0"

@@ -4,42 +4,21 @@ import { map, pipe, assoc, mapObjIndexed, assocPath } from "ramda";
 
 const dataMappingFields = (data, fields, onChange, prefixPath = []) => {
   return mapObjIndexed((item, key) => {
-    if(fields[key] == undefined) {
+    
+    if(fields[key] === undefined || typeof(fields[key]) !== "function") {
       return ""
     }
-    if(Array.isArray(item) && false) {
-      return item.map((subItem, idx) => {
-        const p = [...prefixPath, key, idx];
-        if(typeof(subItem) == "object") {
-          return dataMappingFields(subItem, fields[key], value => {
-            onChange(assocPath(p, value, data))
-          }, p)
-        } else {
-          return fields[key]({
-            value: subItem,
-            setValue: (val) => onChange(assocPath(p, val, data)),
-            data,
-            prefixPath: p,
-            ownProps: {
-              onChange
-            }
-          })
-        }
-      })
-    } else if(item !== null && typeof(item) === "object" && false) {
-      const p = [...prefixPath, key];
-      return dataMappingFields(data[key], fields, value => onChange(assocPath(p, value, data)), p)
-    } else {
-      return fields[key]({
-        value: item,
-        setValue: val => onChange(assoc(key, val, data)),
-        data,
-        prefixPath,
-        ownProps: {
-          onChange
-        }
-      })
-    }
+
+    const props = {
+      value: item,
+      setValue: val => onChange(assoc(key, val, data)),
+      data,
+      prefixPath,
+      ownProps: {
+        onChange
+      }
+    };
+    return fields[key](props)
   })(data)
 }
 

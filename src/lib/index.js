@@ -5,8 +5,6 @@ import Slice from "./components/Slice";
 import Table from "./components/Table";
 import Editable from "./components/Editable";
 
-import { generateReducer } from "./reducer";
-import RQActions from "./actions";
 export {
   Query,
   Filter,
@@ -14,6 +12,5 @@ export {
   Slice,
   Table,
   Editable,
-  generateReducer,
-  RQActions
+
 };
