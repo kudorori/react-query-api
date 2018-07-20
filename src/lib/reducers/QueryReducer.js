@@ -4,6 +4,9 @@ import QueryActions from "../actions/QueryActions";
 
 
 export default handleActions({
+  [QueryActions.setData]: (state, { payload: { id, data }}) => pipe(
+    assocPath([id, "data"], data)
+  ),
   [QueryActions.onSuccess]: (state, { payload: { id, payload }}) => pipe(
     assocPath([id, "response"], payload),
     assocPath([id, "data"], payload.data),
