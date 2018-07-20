@@ -93,7 +93,7 @@ export default (_id, _props) => NestedComponent => {
         this.onRequest(nextProps.options)
       }
 
-      if( nextProps.disabled ) {
+      if( nextProps.disabled && !prevProps.disabled) {
         this.onInitial();
       }
 
