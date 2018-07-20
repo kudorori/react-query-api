@@ -1,6 +1,6 @@
 import React from "react";
 import PT from "prop-types";
-import { assoc, equals, pipe, assocPath, pathOr, mergeAll, mergeWith } from "ramda";
+import { assoc, equals, pipe, assocPath, pathOr, mergeAll, mergeWith, merge } from "ramda";
 import axios from "axios";
 
 export default (_id, _props) => NestedComponent => {
@@ -37,7 +37,7 @@ export default (_id, _props) => NestedComponent => {
 
     onInitial = (options) => {
       if(this.props[_id] !== undefined && this.props[_id].onInitial !== undefined) {
-        this.propss[_id].onInitial(options)
+        this.props[_id].onInitial(options)
       } else {
         this.setState(pipe(
           assoc("data", {}),
@@ -116,7 +116,7 @@ export default (_id, _props) => NestedComponent => {
     }
 
     render() {
-      const passProps = mergeWith(mergeAll, this.props, {
+      const passProps = mergeWith(merge, this.props, {
         [_id]: {
           ...this.state,
           refresh: this.refresh

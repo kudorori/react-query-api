@@ -12,7 +12,7 @@ class UserList extends React.Component {
     return (
       <div>
         <div>UserList { this.props.userId}</div>
-        <button onClick={() => this.props.getUserList.refresh()}>refresh</button>
+        <button onClick={() => this.props.getUserList.refresh("")}>refresh</button>
       </div>
 
     )
