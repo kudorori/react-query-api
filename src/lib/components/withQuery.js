@@ -85,18 +85,20 @@ export default (_id, _props) => NestedComponent => {
     getIsRefresh = props => pathOr(false, [_id, "isRefresh"], props);
 
     componentDidUpdate(prevProps, prevState) {
-      const oldProps = this.getProps(prevProps);
-      const nextProps = this.getProps(this.props);
-      const isGetData = ! nextProps.disabled && !equals(oldProps.options, nextProps.options);
-      const isRefresh = this.getIsRefresh(this.props) && (this.getIsRefresh(prevProps) !== this.getIsRefresh(this.props))
-      if( isGetData || isRefresh ) {
-        this.onRequest(nextProps.options)
-      }
 
-      if( nextProps.disabled && !prevProps.disabled) {
-        this.onInitial();
-      }
+      if(!equals(prevProps, this.props)) {
+        const oldProps = this.getProps(prevProps);
+        const nextProps = this.getProps(this.props);
+        const isGetData = ! nextProps.disabled && !equals(oldProps.options, nextProps.options);
+        const isRefresh = this.getIsRefresh(this.props) && (this.getIsRefresh(prevProps) !== this.getIsRefresh(this.props))
+        if( isGetData || isRefresh ) {
+          this.onRequest(nextProps.options)
+        }
 
+        if( nextProps.disabled && !oldProps.disabled) {
+          this.onInitial();
+        }
+      }
     }
 
     componentDidMount() {

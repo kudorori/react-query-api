@@ -25,16 +25,15 @@ const a = withQueryConnect("getUserList", props => ({
     params: {
       unix: 100
     },
-  },
-  disabled: false
+  }
 }))(UserList)
-// export default a;
-export default withQuery("getUserList2", props => ({
-  options: {
-    url: `https://5b31e5237ad3350014b434a2.mockapi.io/api/user/${props.userId}`,
-    params: {
-      unix: 100
-    },
-  },
-  disabled: false
-}))(a)
+export default a;
+// export default withQuery("getUserList2", props => ({
+//   options: {
+//     url: `https://5b31e5237ad3350014b434a2.mockapi.io/api/user/${props.userId}`,
+//     params: {
+//       unix: 100
+//     },
+//   },
+//   disabled: false
+// }))(a)
