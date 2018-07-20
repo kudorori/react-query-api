@@ -1,7 +1,10 @@
-import { assocPath, evolve, pipe } from "ramda";
+import { assocPath, pipe } from "ramda";
+import { createActions, handleActions } from "redux-actions";
+import EditableActions from "../actions/EditableActions";
 
-export default (path, actions) => {
-  return {
-    [actions.onChange]: (state, { payload }) => assocPath([...path, "data"], payload, state)
-  }
-}
+
+export default handleActions({
+  [EditableActions.onChange]: (state, { payload: { id, payload }}) => pipe(
+    assocPath([id, "data"], payload)
+  )(state)
+}, {})

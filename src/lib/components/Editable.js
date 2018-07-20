@@ -4,7 +4,7 @@ import { map, pipe, assoc, mapObjIndexed, assocPath } from "ramda";
 
 const dataMappingFields = (data, fields, onChange, prefixPath = []) => {
   return mapObjIndexed((item, key) => {
-    
+
     if(fields[key] === undefined || typeof(fields[key]) !== "function") {
       return ""
     }
@@ -13,7 +13,6 @@ const dataMappingFields = (data, fields, onChange, prefixPath = []) => {
       value: item,
       setValue: val => onChange(assoc(key, val, data)),
       data,
-      prefixPath,
       ownProps: {
         onChange
       }
@@ -28,7 +27,8 @@ export default class Form extends React.Component {
     data: PT.any,
     fields: PT.arrayOf(PT.any),
     children: PT.func.isRequired,
-    onChange: PT.func
+    onChange: PT.func,
+    schema: PT.any
   }
 
   static defaultProps = {
@@ -44,7 +44,7 @@ export default class Form extends React.Component {
     } = nextProps;
 
     return {
-      components: dataMappingFields(data, fields, onChange)
+      fields: dataMappingFields(data, fields, onChange),
     }
   }
   state = {
@@ -54,7 +54,7 @@ export default class Form extends React.Component {
   render() {
     const { children } = this.props;
     if(children !== null && children !== undefined && typeof(children) === "function") {
-      return children(this.state.components)
+      return children(this.state)
     }
   }
 }
