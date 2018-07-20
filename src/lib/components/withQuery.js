@@ -92,6 +92,11 @@ export default (_id, _props) => NestedComponent => {
       if( isGetData || isRefresh ) {
         this.onRequest(nextProps.options)
       }
+
+      if( nextProps.disabled ) {
+        this.onInitial();
+      }
+
     }
 
     componentDidMount() {
