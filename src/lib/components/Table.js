@@ -71,7 +71,7 @@ export default class Table extends React.Component {
         render: "no",
       }, ...props.columns]
     } else {
-      columns = columns
+      columns = props.columns
     }
 
     return {

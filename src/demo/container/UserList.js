@@ -19,12 +19,15 @@ class UserList extends React.Component {
   }
 }
 
+const mockData = data => data;
+
 const a = withQueryConnect("getUserList", props => ({
   options: {
     url: `https://5b31e5237ad3350014b434a2.mockapi.io/api/user/${props.userId}`,
     params: {
       unix: 100
     },
+    transformResponse: mockData
   }
 }))(UserList)
 export default a;
