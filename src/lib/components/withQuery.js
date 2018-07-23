@@ -93,7 +93,7 @@ export default (_id, _props) => NestedComponent => {
         const isGetData = ! nextProps.disabled && !equals(oldProps.options, nextProps.options);
         const isRefresh = this.getIsRefresh(this.props) && (this.getIsRefresh(prevProps) !== this.getIsRefresh(this.props))
         if( isGetData || isRefresh ) {
-          // this.onRequest(nextProps.options)
+          this.onRequest(nextProps.options)
         }
 
         if( nextProps.disabled && !oldProps.disabled) {
