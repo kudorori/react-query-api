@@ -25,7 +25,6 @@ export default (_id, _props) => NestedComponent => {
         } else {
 
           const res = await axios(options);
-          console.log("getRes");
           this.onResponse(res);
           this.onSuccess(res);
         }

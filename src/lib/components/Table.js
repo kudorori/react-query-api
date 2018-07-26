@@ -50,7 +50,7 @@ export default class Table extends React.Component {
     Search: () => <div></div>,
     Pagination: () => <div></div>,
     Actions: () => <div></div>,
-    onPageChange: () => console.log("onPageChange"),
+    onPageChange: () => {},
     autoNum: false,
     page: 1,
     limit: 10,
@@ -58,7 +58,8 @@ export default class Table extends React.Component {
     multi: false,
     primaryKeyIndex: 0,
     selected: [],
-    onItemSelected: () => console.log("onRowClick"),
+    onItemSelected: () => {},
+    onItemDblClick: () => {},
     itemActiveClass: "active"
   }
 
@@ -105,7 +106,8 @@ export default class Table extends React.Component {
       primaryKeyIndex,
       selected,
       multi,
-      onItemSelected
+      onItemSelected,
+      onItemDblClick
     } = this.props;
     return data.map((item, rowId) => {
       const primaryValue = item[primaryKeyIndex];
@@ -129,6 +131,9 @@ export default class Table extends React.Component {
                 onItemSelected({ data: [primaryValue] })
               }
             }
+          }}
+          onDoubleClick={() => {
+
           }}
           className={classnames({
             [itemActiveClass]: primaryValue != undefined && isSelected,
