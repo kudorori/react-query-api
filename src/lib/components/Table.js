@@ -1,7 +1,7 @@
 import React from "react";
 import { Filter, Query, Slice, Map } from "../";
 import PT from "prop-types";
-import { pathOr, contains, symmetricDifference, union } from "ramda";
+import { pathOr, contains, symmetricDifference, union, insert } from "ramda";
 import classnames from "classnames";
 
 export default class Table extends React.Component {
@@ -25,17 +25,20 @@ export default class Table extends React.Component {
     Pagination: PT.oneOfType([PT.element, PT.func]),
     Actions: PT.oneOfType([PT.element, PT.func]),
     autoNum: PT.bool,
+    autoNumIndex: PT.number,
     searchText: PT.string,
     page: PT.number,
     limit: PT.number,
     disabledPagination: PT.bool,
     onPageChange: PT.func,
-    onItemSelected: PT.func,
+    onRowClick: PT.func,
+    onRowDoubleClick: PT.func,
     selected: PT.arrayOf(PT.any),
     primaryKey: PT.string,
     multi: PT.boolean,
     itemActiveClass: PT.string,
     itemDisabledClass: PT.string,
+    emptyText: "Unknown Column"
   }
   static defaultProps = {
     Wrapper: ({ children }) => <div>{children}</div>,
@@ -52,25 +55,27 @@ export default class Table extends React.Component {
     Actions: () => <div></div>,
     onPageChange: () => {},
     autoNum: false,
+    autoNumIndex: 0,
     page: 1,
     limit: 10,
     data: [],
     multi: false,
     primaryKeyIndex: 0,
     selected: [],
-    onItemSelected: () => {},
-    onItemDblClick: () => {},
+    onRowClick: () => {},
+    onRowDoubleClick: () => {},
     itemActiveClass: "active"
   }
 
   static getDerivedStateFromProps(props, state) {
-
+    const { autoNum, autoNumIndex } = props;
     let columns = [];
+
     if(props.autoNum) {
-      columns = [{
+      columns = insert(autoNumIndex, {
         title: "No.",
-        render: "no",
-      }, ...props.columns]
+        render: "no"
+      }, props.columns)
     } else {
       columns = props.columns
     }
@@ -80,6 +85,8 @@ export default class Table extends React.Component {
       searchText: props.searchText != undefined ? props.searchText.toLowerCase() : ""
     }
   }
+
+  _clickTimer = null;
 
   renderHeader = () => {
     const { HeaderRow } = this.props;
@@ -102,44 +109,58 @@ export default class Table extends React.Component {
   renderBodyRow = (data) => {
     const {
       BodyRow,
+      BodyRowCell,
       itemActiveClass,
       primaryKeyIndex,
       selected,
       multi,
-      onItemSelected,
-      onItemDblClick
+      onRowClick,
+      onRowDoubleClick,
+      disabledPagination,
+      limit,
+      page,
+      emptyText
     } = this.props;
-    return data.map((item, rowId) => {
-      const primaryValue = item[primaryKeyIndex];
-      const isSelected = contains(primaryValue, selected);
+    const { columns } = this.state;
+    const startOf = disabledPagination ? 0 : (page - 1) * limit;
+    return data.map((row, rowId) => {
+      const isSelected = selected.indexOf(row) !== -1;
+
       return (
         <BodyRow
           key={rowId}
+          className={classnames({
+            [itemActiveClass]: isSelected,
+          })}
           onClick={() => {
-            if(primaryValue != undefined && isSelected) {
-              //選項已選取，取消選取
-              if( multi ) {
-                onItemSelected({ data: symmetricDifference(selected, [primaryValue])})
-              } else {
-                onItemSelected({ data: [] })
-              }
-            } else if(primaryValue != undefined && !isSelected) {
-              //選項未選取，增加選取
-              if( multi ) {
-                onItemSelected({ data: union(selected, [primaryValue])})
-              } else {
-                onItemSelected({ data: [primaryValue] })
-              }
+            if(this._clickTimer !== null ) {
+              return;
             }
+            this._clickTimer = setTimeout(() => {
+              onRowClick(row);
+              this._clickTimer = null;
+            }, 200)
           }}
           onDoubleClick={() => {
-
+            if(this._clickTimer !== null ) {
+              clearTimeout(this._clickTimer);
+              this._clickTimer = null;
+            }
+            onRowDoubleClick(row);
           }}
-          className={classnames({
-            [itemActiveClass]: primaryValue != undefined && isSelected,
-          })}
         >
-          {this.renderBodyRowCell(item, rowId)}
+          {
+            columns.map((column, colId) => {
+              const data = {
+                no: rowId + startOf + 1,
+                ...row
+              }
+              const str = typeof(column.render) == "function" ? column.render({ data, ownData: row }) : pathOr(emptyText, column.render.split("."), data);
+              return(
+                <BodyRowCell key={`${rowId}-${colId}`}>{str}</BodyRowCell>
+              )
+            })
+          }
         </BodyRow>
       )
     })
@@ -202,31 +223,27 @@ export default class Table extends React.Component {
         {({ data }) => (
           <Slice data={data} startOf={startOf} limit={disabledPagination ? data.length : this.props.limit}>
             {({ data, total }) => (
-              <Map data={data} functor={this.transformRow}>
-                {({ data }) => (
-                  <Wrapper>
-                    <ToolBarWrapper>
-                      <Actions></Actions>
-                      <Search searchText={this.props.searchText}></Search>
-                    </ToolBarWrapper>
-                    <TableWrapper>
-                      { Header != null ? (
-                        <Header>
-                          {this.renderHeader()}
-                        </Header>
-                      ) : this.renderHeader()}
-                      {
-                        Body != null ? (
-                          <Body>
-                            {this.renderBodyRow(data)}
-                          </Body>
-                        ) : this.renderBodyRow(data)
-                      }
-                    </TableWrapper>
-                    <Pagination offset={startOf} limit={limit} page={page} total={total} ></Pagination>
-                  </Wrapper>
-                )}
-              </Map>
+              <Wrapper>
+                <ToolBarWrapper>
+                  <Actions></Actions>
+                  <Search searchText={this.props.searchText}></Search>
+                </ToolBarWrapper>
+                <TableWrapper>
+                  { Header != null ? (
+                    <Header>
+                      {this.renderHeader()}
+                    </Header>
+                  ) : this.renderHeader()}
+                  {
+                    Body != null ? (
+                      <Body>
+                        {this.renderBodyRow(data)}
+                      </Body>
+                    ) : this.renderBodyRow(data)
+                  }
+                </TableWrapper>
+                <Pagination offset={startOf} limit={limit} page={page} total={total} ></Pagination>
+              </Wrapper>
             )}
           </Slice>
         )}
