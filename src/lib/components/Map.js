@@ -1,7 +1,8 @@
 import React from "react";
 import PT from "prop-types";
+import objectHash from 'object-hash'
 
-export default class Map extends React.Component {
+export default class Map extends React.PureComponent {
   static propTypes = {
     data: PT.arrayOf(PT.any),
     functor: PT.func,
@@ -13,9 +14,15 @@ export default class Map extends React.Component {
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
+    const hash = objectHash(nextProps.data)
+    if( hash === prevState.hash) {
+      return null;
+    }
+
     return {
       data: nextProps.data,
-      compileData: nextProps.data.map(nextProps.functor)
+      compileData: nextProps.data.map(nextProps.functor),
+      hash: hash
     }
   }
   state = {
@@ -25,6 +32,7 @@ export default class Map extends React.Component {
 
   render() {
     const { children } = this.props;
+    console.log('map render')
     if(children !== null && children !== undefined && typeof(children) === "function") {
       return children({
         data: this.state.compileData

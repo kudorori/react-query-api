@@ -1,8 +1,52 @@
 import React from "react";
-import { Filter, Query, Slice, Map } from "../";
 import PT from "prop-types";
-import { pathOr, contains, symmetricDifference, union, insert } from "ramda";
+import {
+  pathOr,
+  prop,
+  contains,
+  symmetricDifference,
+  union,
+  insert,
+  memoizeWith,
+  map,
+  filter,
+  slice,
+  sortBy,
+  pipe,
+  reverse,
+  when,
+  path
+} from "ramda";
 import classnames from "classnames";
+
+const reactToString = element => {
+  if (!element) {
+    return '';
+  }
+
+  if (typeof element === 'string') {
+    return element;
+  }
+
+  if (typeof element === 'number') {
+    return String(element);
+  }
+
+  if (Array.isArray(element)) {
+    return element.map(subElement => reactToString(subElement)).join('');
+  }
+
+  if (element.props && element.props.children) {
+    return reactToString(element.props.children);
+  }
+
+  if (element.props && !element.props.children) {
+    return '';
+  }
+
+  return '';
+}
+
 
 export default class Table extends React.Component {
   static propTypes = {
@@ -35,18 +79,20 @@ export default class Table extends React.Component {
     onRowDoubleClick: PT.func,
     selected: PT.arrayOf(PT.any),
     primaryKey: PT.string,
-    multi: PT.boolean,
+    multi: PT.bool,
     itemActiveClass: PT.string,
     itemDisabledClass: PT.string,
-    emptyText: "Unknown Column"
+    emptyText: PT.string,
+    sort: PT.number,
+    onSortChange: PT.function
   }
   static defaultProps = {
     Wrapper: ({ children }) => <div>{children}</div>,
     TableWrapper: ({ children }) => <table>{children}</table>,
     ToolBarWrapper: ({ children }) => <div>{children}</div>,
     Header: ({ children }) => <thead>{children}</thead>,
-    HeaderRow: ({ children }) => <tr>{children}</tr>,
-    HeaderRowCell: ({ children }) => <th>{children}</th>,
+    HeaderRow: (props) => <tr {...props}></tr>,
+    HeaderRowCell: (props) => <th {...props}></th>,
     Body: ({ children }) => <tbody>{children}</tbody>,
     BodyRow: (props) => <tr {...props}></tr>,
     BodyRowCell: ({ children }) => <td>{children}</td>,
@@ -66,7 +112,9 @@ export default class Table extends React.Component {
     onRowDoubleClick: () => {},
     itemActiveClass: "active"
   }
-
+  state = {
+    columns: []
+  }
   static getDerivedStateFromProps(props, state) {
     const { autoNum, autoNumIndex } = props;
     let columns = [];
@@ -88,25 +136,50 @@ export default class Table extends React.Component {
 
   _clickTimer = null;
 
-  renderHeader = () => {
-    const { HeaderRow } = this.props;
-    const { columns } = this.state;
+  renderHeader = (data) => {
+    const { HeaderRow, HeaderRowCell, sort, onSortChange } = this.props;
+    const { columns = [] } = this.state;
+    const absSort = Math.abs(sort) - 1;
     return (
       <HeaderRow>
-        {columns.map(this.renderHeaderCell)}
+        {columns.map((column, idx) => {
+          const props = column.cellProps || {};
+          const openSort = pathOr(true, ['sort'], column)
+          return (
+            <HeaderRowCell
+              key={idx}
+              onClick={() => {
+                if( !openSort ) {
+                  return;
+                }
+                if( absSort === idx) {
+                  onSortChange(-sort)
+                } else {
+                  onSortChange(idx + 1)
+                }
+
+              }}
+              {...props}
+            >
+              { typeof(column.title) == "function" ? column.title({ rows: data }) : column.title }
+              {openSort && (
+                <i
+                  style={{ margin: '0px 6px'}}
+                  className={classnames([{
+                    'fa': true,
+                    'fa-sort': absSort !== idx,
+                    'fa-sort-asc': sort > 0 && absSort === idx,
+                    'fa-sort-desc': sort < 0 && absSort=== idx
+                  }])}
+                ></i>
+              )}
+            </HeaderRowCell>
+          )
+        })}
       </HeaderRow>
     )
   };
-  renderHeaderCell = (column, idx) => {
-    const { HeaderRowCell } = this.props
-    const props = column.cellProps || {};
-    return (
-      <HeaderRowCell key={idx} {...props}>
-        { typeof(column.title) == "function" ? column.title() : column.title }
-      </HeaderRowCell>
-    )
-  }
-  renderBodyRow = (data) => {
+  renderBodyRow = (rows) => {
     const {
       BodyRow,
       BodyRowCell,
@@ -121,10 +194,10 @@ export default class Table extends React.Component {
       page,
       emptyText
     } = this.props;
-    const { columns } = this.state;
+    const { columns = [] } = this.state;
     const startOf = disabledPagination ? 0 : (page - 1) * limit;
-    return data.map((row, rowId) => {
-      const isSelected = selected.indexOf(row) !== -1;
+    return rows.map((row, rowId) => {
+      const isSelected = selected.indexOf(row.ownData) !== -1;
 
       return (
         <BodyRow
@@ -137,7 +210,7 @@ export default class Table extends React.Component {
               return;
             }
             this._clickTimer = setTimeout(() => {
-              onRowClick(row);
+              onRowClick(row.ownData);
               this._clickTimer = null;
             }, 200)
           }}
@@ -146,20 +219,13 @@ export default class Table extends React.Component {
               clearTimeout(this._clickTimer);
               this._clickTimer = null;
             }
-            onRowDoubleClick(row);
+            onRowDoubleClick(row.ownData);
           }}
         >
           {
-            columns.map((column, colId) => {
-              const data = {
-                no: rowId + startOf + 1,
-                ...row
-              }
-              const str = typeof(column.render) == "function" ? column.render({ data, ownData: row }) : pathOr(emptyText, column.render.split("."), data);
-              return(
-                <BodyRowCell key={`${rowId}-${colId}`}>{str}</BodyRowCell>
-              )
-            })
+            row.data.map((str, colId) => (
+              <BodyRowCell key={`${rowId}-${colId}`}>{str}</BodyRowCell>
+            ))
           }
         </BodyRow>
       )
@@ -167,7 +233,7 @@ export default class Table extends React.Component {
   }
   renderBodyRowCell = (rows, rowId) => {
     const { BodyRowCell } = this.props;
-    const { columns } = this.state;
+    const { columns = [] } = this.state;
 
     return rows.map((transed, idx) => {
       const props = columns[idx].cellProps || {};
@@ -178,31 +244,54 @@ export default class Table extends React.Component {
   }
 
   transformRow = (row, idx) => {
-    const { disabledPagination, limit, page } = this.props;
+    const { disabledPagination, limit, page, emptyText = '無資料' } = this.props;
     const startOf = disabledPagination ? 0 : (page - 1) * limit;
-    const { columns } = this.state;
-    const data = this.props.autoNum ? { no: startOf + idx + 1, ...row } : row;
-    return columns.map(column => typeof(column.render) == "function" ? column.render({ data, ownData: row }) : pathOr("無資料", column.render.split("."), data));
+    const { columns = [] } = this.state;
+    const data = this.props.autoNum ? { no: idx + 1, ...row } : row;
+    return {
+      data: columns.map(column => typeof(column.render) == "function" ? column.render({ data, ownData: row }) : pathOr(emptyText, column.render.split("."), data)),
+      ownData: row
+    };
   }
   filterRow = row => {
-
-    const { searchText, columns } = this.state;
+    const { searchText, columns = [] } = this.props;
     if(searchText == "" || searchText == undefined) {
       return true;
     }
 
-    return columns.some(column => {
-      const str = typeof(column.render) === "function" ? column.render({ data: row }) : pathOr("", column.render.split("."), row);
-      switch(typeof( str )) {
-        case "string":
-          return str.toLowerCase().indexOf(searchText) != -1;
-          break;
-        case "number":
-          return str.toString().toLowerCase().indexOf(searchText) != -1;
-          break;
-      }
+    return row.data.join("").indexOf(searchText) !== -1
+  }
 
-    })
+  transformRows = arr => arr.map(this.transformRow)
+  filterRows = filter(this.filterRow)
+  sliceRows = (rows, start, limit) => slice(start, parseInt(start) + parseInt(limit), rows)
+  sortRows = (rows, sort) => {
+    if ( rows.length > 0) {
+      const columnIdx = Math.abs(sort) - 1
+      const isNum = !isNaN(parseInt(reactToString(rows[0].data[columnIdx])))
+      const result = rows.slice(0).sort((a, b) => {
+        const aCont = reactToString(a.data[columnIdx])
+        const bCont = reactToString(b.data[columnIdx])
+        if ( isNum ) {
+          return aCont - bCont
+        }
+        return aCont.localeCompare(bCont)
+      })
+      if (sort < 0) {
+        return result.reverse()
+      }
+      return result
+    }
+
+    return []
+
+    return pipe(
+      sortBy(path(['data', Math.abs(sort) - 1])),
+      when(
+        () => sort < 0,
+        reverse
+      )
+    )(rows)
   }
   render() {
     const TableWrapper = this.props.TableWrapper;
@@ -214,40 +303,41 @@ export default class Table extends React.Component {
     const Pagination = this.props.Pagination;
     const Actions = this.props.Actions;
     const ToolBarWrapper = this.props.ToolBarWrapper;
-    const { disabledPagination, limit, page } = this.props;
+    const { disabledPagination, limit, page, sort } = this.props;
     const startOf = disabledPagination ? 0 : (page - 1) * limit;
     const { columns } = this.state;
 
+    const transformRows = this.transformRows(this.props.data)
+    const filterRows = this.filterRows(transformRows)
+    const sortRows = sort !== 0 ? this.sortRows(filterRows, sort) : filterRows
+    const sliceRows = this.sliceRows(sortRows, startOf, disabledPagination ? filterRows.length : limit)
+    const headerChildren = this.renderHeader(sliceRows)
+    const bodyChildren = this.renderBodyRow(sliceRows)
+
     return (
-      <Filter data={this.props.data} functor={this.filterRow}>
-        {({ data }) => (
-          <Slice data={data} startOf={startOf} limit={disabledPagination ? data.length : this.props.limit}>
-            {({ data, total }) => (
-              <Wrapper>
-                <ToolBarWrapper>
-                  <Actions></Actions>
-                  <Search searchText={this.props.searchText}></Search>
-                </ToolBarWrapper>
-                <TableWrapper>
-                  { Header != null ? (
-                    <Header>
-                      {this.renderHeader()}
-                    </Header>
-                  ) : this.renderHeader()}
-                  {
-                    Body != null ? (
-                      <Body>
-                        {this.renderBodyRow(data)}
-                      </Body>
-                    ) : this.renderBodyRow(data)
-                  }
-                </TableWrapper>
-                <Pagination offset={startOf} limit={limit} page={page} total={total} ></Pagination>
-              </Wrapper>
-            )}
-          </Slice>
-        )}
-      </Filter>
+      <Wrapper>
+        <ToolBarWrapper>
+          <Actions></Actions>
+          <Search searchText={this.props.searchText}></Search>
+        </ToolBarWrapper>
+        <TableWrapper>
+          {
+            Header != null ? (
+              <Header>
+                {headerChildren}
+              </Header>
+            ) : headerChildren
+          }
+          {
+            Body != null ? (
+              <Body>
+                {bodyChildren}
+              </Body>
+            ) : bodyChildren
+          }
+        </TableWrapper>
+        <Pagination offset={startOf} limit={limit} page={page} total={filterRows.length} ></Pagination>
+      </Wrapper>
     )
 
   }
